@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "Task Management System (UUID + /auth /users /tasks)",
+    "_postman_id": "tms-uuid-2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "token", "value": ""}
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/register",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\":\"demo_user\",\"email\":\"demo@example.com\",\"password\":\"password123\"}"}
+          }
+        },
+        {
+          "name": "POST /auth/login",
+          "event": [{"listen": "test", "script": {"exec": ["var json = pm.response.json(); pm.collectionVariables.set(\"token\", json.token);"]}}],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\":\"demo_user\",\"password\":\"password123\"}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /users/me",
+          "request": {"method": "GET", "url": "{{baseUrl}}/users/me"}
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "POST /tasks",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"title\":\"Новая задача\",\"description\":\"Описание\",\"priority\":\"HIGH\"}"}
+          }
+        },
+        {
+          "name": "GET /tasks (с фильтрами)",
+          "request": {"method": "GET", "url": "{{baseUrl}}/tasks?status=NEW&priority=HIGH&page=0&size=10"}
+        },
+        {
+          "name": "GET /tasks/{id}",
+          "request": {"method": "GET", "url": "{{baseUrl}}/tasks/UUID-ЗДЕСЬ"}
+        },
+        {
+          "name": "PUT /tasks/{id}",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/tasks/UUID-ЗДЕСЬ",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"title\":\"Обновлённый заголовок\",\"status\":\"IN_PROGRESS\"}"}
+          }
+        },
+        {
+          "name": "DELETE /tasks/{id}",
+          "request": {"method": "DELETE", "url": "{{baseUrl}}/tasks/UUID-ЗДЕСЬ"}
+        }
+      ]
+    }
+  ]
+}

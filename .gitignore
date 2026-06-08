@@ -1,0 +1,11 @@
+target/
+*.class
+*.log
+.idea/
+*.iml
+.vscode/
+*.mv.db
+*.trace.db
+.env
+application-local.*
+.DS_Store
