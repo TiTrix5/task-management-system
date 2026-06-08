@@ -17,6 +17,22 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
 
+        String path = request.getRequestURI();
+
+        // Make opening the root in browser friendly (no scary 401)
+        if ("/".equals(path)) {
+            response.setContentType("text/plain;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(
+                "Task Management System API is running.\n\n" +
+                "Open /swagger-ui.html for full documentation and to test the API.\n" +
+                "1. Register: POST /auth/register\n" +
+                "2. Login: POST /auth/login\n" +
+                "3. Use the returned token as Bearer in Authorization header for /tasks and /users/me"
+            );
+            return;
+        }
+
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
@@ -25,7 +41,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             "{\"timestamp\":\"%s\",\"status\":401,\"error\":\"Unauthorized\",\"message\":\"%s\",\"path\":\"%s\"}",
             java.time.LocalDateTime.now(),
             message.replace("\"", "'"),
-            request.getRequestURI()
+            path
         );
 
         response.getWriter().write(body);
