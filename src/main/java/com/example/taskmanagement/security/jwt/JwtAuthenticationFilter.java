@@ -34,16 +34,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUsernameFromJwtToken(jwt);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            if (jwt != null) {
+                if (jwtUtils.validateJwtToken(jwt)) {
+                    String username = jwtUtils.getUsernameFromJwtToken(jwt);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    // Token present but invalid → return 401 immediately
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write(
+                        "{\"timestamp\":\"" + java.time.LocalDateTime.now() +
+                        "\",\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Invalid or expired JWT token\"}"
+                    );
+                    return;
+                }
             }
+            // If no token at all, continue — Security will handle with entry point / access denied (JSON 403 for protected paths via GlobalExceptionHandler)
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e.getMessage());
         }
